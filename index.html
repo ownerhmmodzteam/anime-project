@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V6</title>
+    <title>HM MODZ STREAM V7</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -45,7 +45,6 @@
             background: rgba(255,255,255,0.07);
             color: #fff;
             outline: none;
-            backdrop-filter: blur(10px);
         }
 
         #player-section {
@@ -133,11 +132,11 @@
 
     <div id="player-section">
         <div class="player-head">
-            <span id="playing-title" style="color: #666;"></span>
+            <span id="playing-title" style="color: #888;"></span>
             <span class="close-txt" onclick="closePlayer()">TUTUP X</span>
         </div>
         <div class="video-wrapper">
-            <iframe id="video-player" src="" allowfullscreen></iframe>
+            <iframe id="video-player" src="" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
         </div>
     </div>
 
@@ -157,8 +156,8 @@
 
     async function getAnime(query = '') {
         const url = query 
-            ? `https://api.jikan.moe/v4/anime?q=${query}&limit=20` 
-            : `https://api.jikan.moe/v4/top/anime?limit=20`;
+            ? `https://api.jikan.moe/v4/anime?q=${query}&limit=24` 
+            : `https://api.jikan.moe/v4/top/anime?limit=24`;
         try {
             const res = await fetch(url);
             const json = await res.json();
@@ -172,22 +171,17 @@
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `<img src="${item.images.webp.large_image_url}"><div class="card-info"><h3>${item.title}</h3></div>`;
-            div.onclick = () => playAnime(item.title);
+            div.onclick = () => playAnime(item.title, item.mal_id);
             grid.appendChild(div);
         });
     }
 
-    function playAnime(title) {
+    function playAnime(title, id) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         playerSection.style.display = 'block';
         playingTitle.innerText = `Streaming: ${title}`;
         
-        const cleanTitle = encodeURIComponent(title.replace(/[:;]/g, ''));
-        videoPlayer.src = `https://black-mamba.pages.dev/embed/gogo?q=${cleanTitle}`;
-        
-        if(!videoPlayer.src) {
-             videoPlayer.src = `https://www.2embed.cc/embed/anime?title=${cleanTitle}`;
-        }
+        videoPlayer.src = `https://www.slow-m.my.id/embed/mal/${id}`;
     }
 
     function closePlayer() {
