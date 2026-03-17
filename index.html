@@ -3,61 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V18</title>
+    <title>HM MODZ STREAM V19 - YOUTUBE API</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: #000; color: #fff; padding: 15px; }
         .container { max-width: 900px; margin: 0 auto; }
-        header { text-align: center; padding: 25px 0; }
+        header { text-align: center; padding: 20px 0; }
         header h1 { font-size: 24px; color: #007AFF; font-weight: 800; }
-        .search-container { margin-bottom: 25px; position: sticky; top: 15px; z-index: 10; }
-        input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #222; background: #111; color: #fff; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .search-container { margin-bottom: 25px; }
+        input { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #222; background: #111; color: #fff; outline: none; }
+        #player-area { display: none; margin-bottom: 25px; background: #0a0a0a; border-radius: 15px; overflow: hidden; border: 1px solid #222; }
+        .video-box { position: relative; padding-bottom: 56.25%; height: 0; }
+        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: #0a0a0a; border-radius: 15px; overflow: hidden; border: 1px solid #1a1a1a; cursor: pointer; transition: 0.3s; }
-        .card:hover { transform: scale(1.03); border-color: #007AFF; }
-        .card img { width: 100%; height: 210px; object-fit: cover; }
-        .card-info { padding: 12px; font-size: 12px; text-align: center; font-weight: 600; }
-        .badge { background: #ff0000; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
+        .card { background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.3s; }
+        .card:hover { border-color: #007AFF; transform: translateY(-5px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-info { padding: 10px; font-size: 12px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header><h1>HM MODZ STREAM <span style="color:#fff">MUSE</span></h1></header>
+    <header><h1>HM MODZ STREAM <span style="color:#fff">PRO</span></h1></header>
+
+    <div id="player-area">
+        <div style="padding: 10px; display: flex; justify-content: space-between; font-size: 12px;">
+            <span id="video-title" style="color:#aaa">Pilih Anime...</span>
+            <span style="color:#ff5f57; cursor:pointer; font-weight:bold;" onclick="closePlayer()">TUTUP X</span>
+        </div>
+        <div class="video-box">
+            <iframe id="yt-frame" src="" allowfullscreen></iframe>
+        </div>
+    </div>
 
     <div class="search-container">
-        <input type="text" id="search" placeholder="Cari anime Muse (Frieren, Wind Breaker)...">
+        <input type="text" id="search" placeholder="Cari anime Muse (contoh: Wind Breaker)...">
     </div>
 
     <div class="anime-grid" id="grid"></div>
 </div>
 
 <script>
+    const API_KEY = 'MASUKKAN_API_KEY_TUAN_DISINI'; // <-- Ganti dengan API Key YouTube Tuan
     const grid = document.getElementById('grid');
+    const player = document.getElementById('player-area');
+    const frame = document.getElementById('yt-frame');
+    const titleLabel = document.getElementById('video-title');
 
     async function searchAnime(q = '') {
+        const query = q || 'Muse Indonesia Anime';
         try {
-            const res = await fetch(`https://api.jikan.moe/v4/anime?q=${q}&limit=20`);
+            const res = await fetch(`https://api.jikan.moe/v4/anime?q=${q}&limit=12`);
             const json = await res.json();
             draw(json.data);
-        } catch (e) {}
+        } catch (e) { console.error("Jikan API Error"); }
     }
 
     function draw(list) {
         grid.innerHTML = list.map(a => `
-            <div class="card" onclick="goToMuse('${a.title}')">
+            <div class="card" onclick="getYouTubeVideo('${a.title}')">
                 <img src="${a.images.jpg.image_url}">
-                <div class="card-info">
-                    <span class="badge">OPEN IN YOUTUBE</span><br>
-                    ${a.title}
-                </div>
+                <div class="card-info">${a.title}</div>
             </div>
         `).join('');
     }
 
-    function goToMuse(title) {
-        const query = encodeURIComponent(title + " Muse Indonesia");
-        window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
+    async function getYouTubeVideo(animeTitle) {
+        titleLabel.innerText = "Mencari video: " + animeTitle;
+        const searchQuery = encodeURIComponent(animeTitle + " Muse Indonesia");
+        
+        try {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${searchQuery}&type=video&key=${API_KEY}`);
+            const data = await res.json();
+
+            if (data.items && data.items.length > 0) {
+                const videoId = data.items[0].id.videoId;
+                playVideo(videoId, data.items[0].snippet.title);
+            } else {
+                alert("Video tidak ditemukan di Muse Indonesia, Tuan 🗿");
+            }
+        } catch (e) {
+            alert("API Key YouTube Tuan mungkin salah atau limit habis 🗿");
+        }
+    }
+
+    function playVideo(id, fullTitle) {
+        player.style.display = 'block';
+        titleLabel.innerText = fullTitle;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        frame.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+    }
+
+    function closePlayer() {
+        player.style.display = 'none';
+        frame.src = '';
     }
 
     let t;
@@ -66,7 +106,7 @@
         t = setTimeout(() => searchAnime(e.target.value), 800);
     };
 
-    searchAnime('Trend');
+    searchAnime();
 </script>
 </body>
 </html>
