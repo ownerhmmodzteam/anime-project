@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V5</title>
+    <title>HM MODZ STREAM V6</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -139,7 +139,6 @@
         <div class="video-wrapper">
             <iframe id="video-player" src="" allowfullscreen></iframe>
         </div>
-        <div id="server-status" style="font-size: 10px; color: #444; margin-top: 8px; text-align: center;">Menggunakan Server Global</div>
     </div>
 
     <div class="search-container">
@@ -173,17 +172,22 @@
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `<img src="${item.images.webp.large_image_url}"><div class="card-info"><h3>${item.title}</h3></div>`;
-            div.onclick = () => playAnime(item.title, item.mal_id);
+            div.onclick = () => playAnime(item.title);
             grid.appendChild(div);
         });
     }
 
-    function playAnime(title, id) {
+    function playAnime(title) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         playerSection.style.display = 'block';
         playingTitle.innerText = `Streaming: ${title}`;
         
-        videoPlayer.src = `https://vidsrc.me/embed/anime?mal=${id}`;
+        const cleanTitle = encodeURIComponent(title.replace(/[:;]/g, ''));
+        videoPlayer.src = `https://black-mamba.pages.dev/embed/gogo?q=${cleanTitle}`;
+        
+        if(!videoPlayer.src) {
+             videoPlayer.src = `https://www.2embed.cc/embed/anime?title=${cleanTitle}`;
+        }
     }
 
     function closePlayer() {
