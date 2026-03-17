@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V11</title>
+    <title>HM MODZ STREAM V12</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', sans-serif; }
@@ -14,15 +14,14 @@
         #player-section { display: none; margin-bottom: 30px; background: #0a0a0a; border-radius: 20px; padding: 10px; border: 1px solid #1a1a1a; }
         .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; }
         iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .server-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-        .btn-s { background: #1a1a1a; color: #ccc; border: 1px solid #333; padding: 8px; border-radius: 8px; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .server-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+        .btn-s { background: #1a1a1a; color: #ccc; border: 1px solid #333; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; }
         .btn-s.active { background: #fff; color: #000; border-color: #fff; }
-        .ep-container { margin-top: 15px; display: flex; gap: 10px; align-items: center; }
+        .ep-control { margin-top: 15px; display: flex; gap: 10px; align-items: center; justify-content: center; }
         #anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: #0f0f0f; border-radius: 15px; overflow: hidden; border: 1px solid #1a1a1a; cursor: pointer; transition: 0.3s; }
+        .card { background: #0f0f0f; border-radius: 15px; overflow: hidden; border: 1px solid #1a1a1a; cursor: pointer; }
         .card img { width: 100%; height: 200px; object-fit: cover; }
         .card-info { padding: 10px; font-size: 0.8rem; text-align: center; }
-        .player-head { display: flex; justify-content: space-between; padding: 5px 10px 10px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -31,33 +30,36 @@
     <header><h1>HM MODZ Stream</h1></header>
 
     <div id="player-section">
-        <div class="player-head">
-            <span id="playing-title" style="color: #888;"></span>
-            <span style="color: #ff5f57; cursor: pointer; font-weight: 600;" onclick="closePlayer()">TUTUP X</span>
+        <div style="display: flex; justify-content: space-between; padding: 5px 10px 10px;">
+            <span id="playing-title" style="color: #888; font-size: 0.75rem;"></span>
+            <span style="color: #ff5f57; cursor: pointer; font-weight: 600; font-size: 0.75rem;" onclick="closePlayer()">TUTUP X</span>
         </div>
         <div class="video-wrapper">
             <iframe id="video-player" src="" allowfullscreen></iframe>
         </div>
-        <div class="ep-container">
-            <span style="font-size: 12px;">Episode:</span>
-            <input type="number" id="ep-num" value="1" min="1" style="width: 60px; margin: 0; padding: 5px 10px;">
+        <div class="ep-control">
+            <button class="btn-s" onclick="changeEp(-1)">PREV</button>
+            <span style="font-size: 14px; font-weight: 600;">EP <span id="current-ep-display">1</span></span>
+            <button class="btn-s" onclick="changeEp(1)">NEXT</button>
         </div>
         <div class="server-grid" id="server-list"></div>
     </div>
 
-    <input type="text" id="search" placeholder="Cari judul anime, Tuan...">
+    <input type="text" id="search" placeholder="Cari anime yang bener, Tuan...">
     <div id="anime-grid"></div>
 </div>
 
 <script>
     const grid = document.getElementById('anime-grid');
-    const searchInput = document.getElementById('search');
     const playerSection = document.getElementById('player-section');
     const videoPlayer = document.getElementById('video-player');
     const playingTitle = document.getElementById('playing-title');
+    const epDisplay = document.getElementById('current-ep-display');
     const serverList = document.getElementById('server-list');
-    const epInput = document.getElementById('ep-num');
+    
     let currentId = '';
+    let currentEp = 1;
+    let currentTitle = '';
 
     async function getAnime(query = '') {
         const url = query ? `https://api.jikan.moe/v4/anime?q=${query}&limit=20` : `https://api.jikan.moe/v4/top/anime?limit=20`;
@@ -79,22 +81,20 @@
 
     function playAnime(title, id) {
         currentId = id;
+        currentTitle = title;
+        currentEp = 1;
+        epDisplay.innerText = currentEp;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         playerSection.style.display = 'block';
         playingTitle.innerText = `Nonton: ${title}`;
-        setupServers();
+        loadServers();
     }
 
-    function setupServers() {
-        const ep = epInput.value;
+    function loadServers() {
         const servers = [
-            { name: 'S-Lokal', url: `https://www.slow-m.my.id/embed/mal/${currentId}/${ep}` },
-            { name: 'S-Stream', url: `https://www.bread-m.my.id/embed/mal/${currentId}/${ep}` },
-            { name: 'Server 1', url: `https://vidsrc.to/embed/anime/${currentId}/${ep}` },
-            { name: 'Server 2', url: `https://vidsrc.me/embed/anime?mal=${currentId}&ep=${ep}` },
-            { name: 'Server 3', url: `https://vidsrc.xyz/embed/anime?mal=${currentId}&ep=${ep}` },
-            { name: 'Server 4', url: `https://anime.vidsrc.pro/embed/anime/${currentId}?episode=${ep}` },
-            { name: 'Alt-1', url: `https://2embed.cc/embed/anime?mal=${currentId}&ep=${ep}` }
+            { name: 'Server Utama', url: `https://vidsrc.to/embed/anime/${currentId}/${currentEp}` },
+            { name: 'Server Lokal', url: `https://www.slow-m.my.id/embed/mal/${currentId}/${currentEp}` },
+            { name: 'Server Backup', url: `https://vidsrc.xyz/embed/anime?mal=${currentId}&ep=${currentEp}` }
         ];
 
         serverList.innerHTML = '';
@@ -112,7 +112,11 @@
         videoPlayer.src = servers[0].url;
     }
 
-    epInput.onchange = setupServers;
+    function changeEp(val) {
+        currentEp = Math.max(1, currentEp + val);
+        epDisplay.innerText = currentEp;
+        loadServers();
+    }
 
     function closePlayer() {
         playerSection.style.display = 'none';
@@ -120,7 +124,7 @@
     }
 
     let timer;
-    searchInput.oninput = (e) => {
+    document.getElementById('search').oninput = (e) => {
         clearTimeout(timer);
         timer = setTimeout(() => getAnime(e.target.value), 700);
     };
