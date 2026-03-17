@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM STREAM | STEALTH V5</title>
+    <title>HM STREAM | V6 PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -12,10 +12,9 @@
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .card { background: #111; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.3s; }
         .card:hover { border-color: var(--main); transform: scale(1.02); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; }
         .btn-genre { white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; font-size: 10px; }
         .btn-genre.active { background: var(--main); color: black; border-color: var(--main); font-weight: bold; }
+        iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; }
     </style>
 </head>
 <body class="pb-20">
@@ -23,23 +22,22 @@
     <nav class="glass sticky top-0 px-6 py-4 flex flex-col gap-4 z-50">
         <div class="flex justify-between items-center">
             <h1 class="text-xl font-black italic uppercase">HM <span class="text-[#10b981]">Stream</span></h1>
-            <div id="status" class="text-[8px] font-bold text-emerald-500 uppercase px-3 py-1 bg-emerald-500/10 rounded-full tracking-tighter">Tunneling Active</div>
+            <div id="status" class="text-[8px] font-bold text-emerald-500 uppercase px-3 py-1 bg-emerald-500/10 rounded-full tracking-tighter">System: Online</div>
         </div>
         <div class="relative">
-            <input type="text" id="query" placeholder="Cari anime..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:border-[#10b981] outline-none">
+            <input type="text" id="query" placeholder="Cari judul anime..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:border-[#10b981] outline-none">
         </div>
         <div id="genre-container" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button onclick="setGenre('', this)" class="btn-genre active px-4 py-1.5 rounded-full uppercase">Recent</button>
+            <button onclick="setGenre('', this)" class="btn-genre active px-4 py-1.5 rounded-full uppercase">Terbaru</button>
             <button onclick="setGenre('action', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Action</button>
             <button onclick="setGenre('adventure', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Adventure</button>
             <button onclick="setGenre('comedy', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Comedy</button>
-            <button onclick="setGenre('fantasy', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Fantasy</button>
         </div>
     </nav>
 
     <main class="p-4 max-w-7xl mx-auto">
         <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-        <div id="loader" class="text-center py-20 text-[10px] animate-pulse uppercase tracking-[0.5em]">Syncing Data...</div>
+        <div id="loader" class="text-center py-20 text-[10px] animate-pulse uppercase tracking-widest">Memanggil Data...</div>
     </main>
 
     <div id="modal" class="fixed inset-0 hidden z-[99] bg-black/98 flex items-center justify-center p-4">
@@ -50,39 +48,27 @@
     </div>
 
     <script>
-        const API_LIST = [
-            "https://consumet-api-production-e852.up.railway.app/anime/gogoanime",
-            "https://api.consumet.org/anime/gogoanime"
-        ];
-        
+        const API = "https://consumet-api-production-e852.up.railway.app/anime/gogoanime";
         let page = 1;
         let genre = '';
         let searching = false;
 
-        async function request(path) {
-            for (let base of API_LIST) {
-                try {
-                    const r = await fetch(base + path);
-                    if (r.ok) return await r.json();
-                } catch (e) { continue; }
-            }
-            throw new Error();
-        }
-
         async function sync(reset = false) {
             if (reset) { page = 1; document.getElementById('grid').innerHTML = ''; }
             document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('status').innerText = "System: Syncing...";
             
             try {
-                let p = searching ? `/${document.getElementById('query').value}?page=${page}` : 
-                        (genre ? `/genre/${genre}?page=${page}` : `/recent-releases?page=${page}`);
+                let path = searching 
+                    ? `/search/${document.getElementById('query').value}?page=${page}`
+                    : (genre ? `/genre/${genre}?page=${page}` : `/recent-releases?page=${page}`);
                 
-                const data = await request(p);
-                const items = data.results || [];
+                const r = await fetch(API + path);
+                const d = await r.json();
                 
-                if (items.length) {
+                if (d.results && d.results.length > 0) {
                     const container = document.getElementById('grid');
-                    items.forEach(i => {
+                    d.results.forEach(i => {
                         const el = document.createElement('div');
                         el.className = 'card cursor-pointer';
                         el.onclick = () => play(i.episodeId || i.id);
@@ -92,6 +78,7 @@
                         `;
                         container.appendChild(el);
                     });
+                    document.getElementById('status').innerText = "System: Online";
                 }
             } catch (e) {
                 document.getElementById('status').innerText = "Sync Failed";
@@ -103,12 +90,12 @@
         async function play(id) {
             const m = document.getElementById('modal'), v = document.getElementById('video-box');
             m.classList.remove('hidden');
-            v.innerHTML = `<div class="aspect-video flex items-center justify-center text-[10px] animate-pulse text-[#10b981] font-bold uppercase">Bypassing Server...</div>`;
+            v.innerHTML = `<div class="aspect-video flex items-center justify-center text-[10px] animate-pulse text-[#10b981] font-bold uppercase">Membuka Jalur...</div>`;
             try {
-                const data = await request(`/watch/${id}`);
-                const src = data.headers?.Referer || data.sources[0].url;
-                v.innerHTML = `<iframe src="${src}" allowfullscreen></iframe>`;
-            } catch (e) { v.innerHTML = `<div class="p-20 text-center text-[10px] uppercase text-red-500">Video Buntu, Tuan.</div>`; }
+                const r = await fetch(`${API}/watch/${id}`);
+                const d = await r.json();
+                v.innerHTML = `<iframe src="${d.headers?.Referer || d.sources[0].url}" allowfullscreen></iframe>`;
+            } catch (e) { v.innerHTML = `<div class="p-20 text-center text-[10px] uppercase text-red-500">Gagal Memuat.</div>`; }
         }
 
         function setGenre(g, b) {
