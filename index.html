@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V9</title>
+    <title>HM MODZ STREAM V10</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -124,6 +124,23 @@
             cursor: pointer;
             font-weight: 600;
         }
+
+        .server-switcher {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .btn-s {
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -139,10 +156,15 @@
         <div class="video-wrapper">
             <iframe id="video-player" src="" allowfullscreen></iframe>
         </div>
+        <div class="server-switcher">
+            <button class="btn-s" onclick="switchServer(1)">Server 1</button>
+            <button class="btn-s" onclick="switchServer(2)">Server 2</button>
+            <button class="btn-s" onclick="switchServer(3)">Server 3</button>
+        </div>
     </div>
 
     <div class="search-container">
-        <input type="text" id="search" placeholder="Cari judul anime, Tuan...">
+        <input type="text" id="search" placeholder="Cari anime, Tuan...">
     </div>
 
     <div id="anime-grid"></div>
@@ -154,6 +176,7 @@
     const playerSection = document.getElementById('player-section');
     const videoPlayer = document.getElementById('video-player');
     const playingTitle = document.getElementById('playing-title');
+    let currentMalId = '';
 
     async function getAnime(query = '') {
         const url = query 
@@ -178,11 +201,20 @@
     }
 
     function playAnime(title, id) {
+        currentMalId = id;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         playerSection.style.display = 'block';
         playingTitle.innerText = `Streaming: ${title}`;
-        
-        videoPlayer.src = `https://vidsrc.pro/embed/anime/${id}`;
+        switchServer(1);
+    }
+
+    function switchServer(num) {
+        const servers = {
+            1: `https://vidsrc.xyz/embed/anime?mal=${currentMalId}`,
+            2: `https://vidsrc.me/embed/anime?mal=${currentMalId}`,
+            3: `https://anime.vidsrc.pro/embed/anime/${currentMalId}`
+        };
+        videoPlayer.src = servers[num];
     }
 
     function closePlayer() {
