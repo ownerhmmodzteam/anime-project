@@ -1,117 +1,187 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM STREAM | V6 PRO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>HM MODZ - Anime Stream</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #10b981; --bg: #050505; }
-        body { background: var(--bg); color: white; font-family: sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .card { background: #111; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.3s; }
-        .card:hover { border-color: var(--main); transform: scale(1.02); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1); }
-        .btn-genre { white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; font-size: 10px; }
-        .btn-genre.active { background: var(--main); color: black; border-color: var(--main); font-weight: bold; }
-        iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            background: linear-gradient(180deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-box {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #anime-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .anime-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .anime-card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .anime-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+
+        .anime-info {
+            padding: 12px;
+        }
+
+        .anime-info h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .anime-info p {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: #666;
+        }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
-    <nav class="glass sticky top-0 px-6 py-4 flex flex-col gap-4 z-50">
-        <div class="flex justify-between items-center">
-            <h1 class="text-xl font-black italic uppercase">HM <span class="text-[#10b981]">Stream</span></h1>
-            <div id="status" class="text-[8px] font-bold text-emerald-500 uppercase px-3 py-1 bg-emerald-500/10 rounded-full tracking-tighter">System: Online</div>
-        </div>
-        <div class="relative">
-            <input type="text" id="query" placeholder="Cari judul anime..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:border-[#10b981] outline-none">
-        </div>
-        <div id="genre-container" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button onclick="setGenre('', this)" class="btn-genre active px-4 py-1.5 rounded-full uppercase">Terbaru</button>
-            <button onclick="setGenre('action', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Action</button>
-            <button onclick="setGenre('adventure', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Adventure</button>
-            <button onclick="setGenre('comedy', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Comedy</button>
-        </div>
-    </nav>
+<div class="container">
+    <header>
+        <h1>HM MODZ Anime</h1>
+    </header>
 
-    <main class="p-4 max-w-7xl mx-auto">
-        <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-        <div id="loader" class="text-center py-20 text-[10px] animate-pulse uppercase tracking-widest">Memanggil Data...</div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 hidden z-[99] bg-black/98 flex items-center justify-center p-4">
-        <div class="w-full max-w-4xl relative">
-            <button onclick="closePlayer()" class="absolute -top-10 right-0 text-white/50 text-[10px] font-bold uppercase tracking-widest">Tutup <i class="fa-solid fa-xmark ml-1"></i></button>
-            <div id="video-box" class="bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5"></div>
-        </div>
+    <div class="search-box">
+        <input type="text" id="search" placeholder="Cari anime, Tuan...">
     </div>
 
-    <script>
-        const API = "https://consumet-api-production-e852.up.railway.app/anime/gogoanime";
-        let page = 1;
-        let genre = '';
-        let searching = false;
+    <div id="anime-list"></div>
+</div>
 
-        async function sync(reset = false) {
-            if (reset) { page = 1; document.getElementById('grid').innerHTML = ''; }
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('status').innerText = "System: Syncing...";
+<script>
+    const animeList = document.getElementById('anime-list');
+    const searchInput = document.getElementById('search');
+
+    async function fetchAnime(query = '') {
+        animeList.innerHTML = '<div class="loading">Memuat data...</div>';
+        try {
+            const url = query 
+                ? `https://api.jikan.moe/v4/anime?q=${query}&limit=20` 
+                : 'https://api.jikan.moe/v4/top/anime?limit=20';
             
-            try {
-                let path = searching 
-                    ? `/search/${document.getElementById('query').value}?page=${page}`
-                    : (genre ? `/genre/${genre}?page=${page}` : `/recent-releases?page=${page}`);
-                
-                const r = await fetch(API + path);
-                const d = await r.json();
-                
-                if (d.results && d.results.length > 0) {
-                    const container = document.getElementById('grid');
-                    d.results.forEach(i => {
-                        const el = document.createElement('div');
-                        el.className = 'card cursor-pointer';
-                        el.onclick = () => play(i.episodeId || i.id);
-                        el.innerHTML = `
-                            <img src="${i.image.replace('http://', 'https://')}" class="aspect-[3/4.2] object-cover w-full bg-zinc-900" loading="lazy">
-                            <div class="p-3 text-[10px] font-bold truncate uppercase tracking-tighter">${i.title}</div>
-                        `;
-                        container.appendChild(el);
-                    });
-                    document.getElementById('status').innerText = "System: Online";
-                }
-            } catch (e) {
-                document.getElementById('status').innerText = "Sync Failed";
-            } finally {
-                document.getElementById('loader').classList.add('hidden');
-            }
+            const response = await fetch(url);
+            const data = await response.json();
+            displayAnime(data.data);
+        } catch (error) {
+            animeList.innerHTML = '<div class="loading">Gagal ambil data. Cek koneksi, Tuan.</div>';
+        }
+    }
+
+    function displayAnime(animes) {
+        animeList.innerHTML = '';
+        if (!animes || animes.length === 0) {
+            animeList.innerHTML = '<div class="loading">Gak nemu apa-apa.</div>';
+            return;
         }
 
-        async function play(id) {
-            const m = document.getElementById('modal'), v = document.getElementById('video-box');
-            m.classList.remove('hidden');
-            v.innerHTML = `<div class="aspect-video flex items-center justify-center text-[10px] animate-pulse text-[#10b981] font-bold uppercase">Membuka Jalur...</div>`;
-            try {
-                const r = await fetch(`${API}/watch/${id}`);
-                const d = await r.json();
-                v.innerHTML = `<iframe src="${d.headers?.Referer || d.sources[0].url}" allowfullscreen></iframe>`;
-            } catch (e) { v.innerHTML = `<div class="p-20 text-center text-[10px] uppercase text-red-500">Gagal Memuat.</div>`; }
-        }
-
-        function setGenre(g, b) {
-            genre = g; searching = false;
-            document.querySelectorAll('.btn-genre').forEach(x => x.classList.remove('active'));
-            b.classList.add('active');
-            sync(true);
-        }
-
-        function closePlayer() { document.getElementById('modal').classList.add('hidden'); document.getElementById('video-box').innerHTML = ''; }
-
-        document.getElementById('query').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') { searching = true; genre = ''; sync(true); }
+        animes.forEach(anime => {
+            const card = document.createElement('div');
+            card.className = 'anime-card';
+            card.innerHTML = `
+                <img src="${anime.images.webp.large_image_url}" alt="${anime.title}">
+                <div class="anime-info">
+                    <h3>${anime.title}</h3>
+                    <p>${anime.type} • ${anime.score || 'N/A'}</p>
+                </div>
+            `;
+            card.onclick = () => window.open(anime.url, '_blank');
+            animeList.appendChild(card);
         });
+    }
 
-        window.onload = sync;
-    </script>
+    let timeout = null;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            fetchAnime(e.target.value);
+        }, 800);
+    });
+
+    fetchAnime();
+</script>
+
 </body>
 </html>
