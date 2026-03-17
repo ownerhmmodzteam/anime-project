@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM MODZ STREAM V3.1</title>
+    <title>HM MODZ STREAM V4</title>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -30,48 +30,48 @@
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 600;
-            background: linear-gradient(180deg, #fff 0%, #777 100%);
+            background: linear-gradient(180deg, #fff 0%, #555 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .search-container {
             max-width: 500px;
-            margin: 0 auto 40px;
+            margin: 0 auto 30px;
         }
 
         input {
             width: 100%;
             padding: 14px 20px;
-            border-radius: 15px;
+            border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(10px);
             color: #fff;
             outline: none;
         }
 
         #player-section {
             display: none;
-            margin-bottom: 40px;
-            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 30px;
+            background: #111;
             border-radius: 20px;
             padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #222;
         }
 
         .video-wrapper {
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
+            background: #000;
+            border-radius: 12px;
             overflow: hidden;
-            border-radius: 15px;
-            background: #111;
         }
 
-        .video-wrapper iframe {
+        iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -80,67 +80,97 @@
             border: none;
         }
 
+        .server-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .btn-server {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #ccc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-server.active {
+            background: #fff;
+            color: #000;
+        }
+
         #anime-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
         }
 
         .card {
-            background: rgba(255,255,255,0.03);
-            border-radius: 18px;
+            background: #0a0a0a;
+            border-radius: 15px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid #1a1a1a;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255,255,255,0.2);
+            border-color: #444;
+            transform: translateY(-3px);
         }
 
         .card img {
             width: 100%;
-            height: 230px;
+            height: 210px;
             object-fit: cover;
         }
 
         .card-info {
-            padding: 12px;
+            padding: 10px;
         }
 
         .card-info h3 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .btn-close {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 10px;
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
             cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>HM MODZ Stream</h1>
-    </header>
+    <header><h1>HM MODZ Stream</h1></header>
 
     <div id="player-section">
-        <button class="btn-close" onclick="closePlayer()">✕ Tutup Player</button>
-        <h2 id="playing-title" style="margin-bottom: 15px; font-size: 0.9rem; color: #aaa;"></h2>
-        <div class="video-wrapper">
-            <iframe id="video-player" src="" allowfullscreen scrolling="no"></iframe>
+        <div class="controls">
+            <span id="playing-title" style="font-size: 0.8rem; color: #888;"></span>
+            <button class="close-btn" onclick="closePlayer()">Tutup X</button>
         </div>
+        <div class="video-wrapper">
+            <iframe id="video-player" src="" allowfullscreen></iframe>
+        </div>
+        <div class="server-list" id="server-list"></div>
     </div>
 
     <div class="search-container">
@@ -156,19 +186,17 @@
     const playerSection = document.getElementById('player-section');
     const videoPlayer = document.getElementById('video-player');
     const playingTitle = document.getElementById('playing-title');
+    const serverList = document.getElementById('server-list');
 
     async function getAnime(query = '') {
         const url = query 
             ? `https://api.jikan.moe/v4/anime?q=${query}&limit=24` 
             : `https://api.jikan.moe/v4/top/anime?limit=24`;
-
         try {
             const res = await fetch(url);
             const json = await res.json();
             render(json.data);
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) {}
     }
 
     function render(list) {
@@ -176,24 +204,37 @@
         list.forEach(item => {
             const div = document.createElement('div');
             div.className = 'card';
-            div.innerHTML = `
-                <img src="${item.images.webp.large_image_url}">
-                <div class="card-info">
-                    <h3>${item.title}</h3>
-                </div>
-            `;
-            div.onclick = () => playAnime(item.title, item.title_english || item.title);
+            div.innerHTML = `<img src="${item.images.webp.large_image_url}"><div class="card-info"><h3>${item.title}</h3></div>`;
+            div.onclick = () => loadServers(item.title, item.mal_id);
             grid.appendChild(div);
         });
     }
 
-    function playAnime(displayTitle, searchTitle) {
+    function loadServers(title, id) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         playerSection.style.display = 'block';
-        playingTitle.innerText = `Menonton: ${displayTitle}`;
+        playingTitle.innerText = `Menonton: ${title}`;
         
-        const cleanTitle = searchTitle.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-").toLowerCase();
-        videoPlayer.src = `https://moviesapi.club/anime/${cleanTitle}-episode-1`;
+        const providers = [
+            { name: 'Server 1', url: `https://shira.top/embed/mal/${id}` },
+            { name: 'Server 2', url: `https://www.bread-m.my.id/embed/mal/${id}` },
+            { name: 'Server 3', url: `https://api.amvstr.me/api/v2/stream/${id}` }
+        ];
+
+        serverList.innerHTML = '';
+        providers.forEach((p, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-server' + (i === 0 ? ' active' : '');
+            btn.innerText = p.name;
+            btn.onclick = () => {
+                document.querySelectorAll('.btn-server').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                videoPlayer.src = p.url;
+            };
+            serverList.appendChild(btn);
+        });
+        
+        videoPlayer.src = providers[0].url;
     }
 
     function closePlayer() {
@@ -209,6 +250,5 @@
 
     getAnime();
 </script>
-
 </body>
 </html>
