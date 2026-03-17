@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM STREAM | ULTIMATE</title>
+    <title>HM STREAM | BYPASS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,7 +11,7 @@
         body { background: var(--bg); color: white; font-family: sans-serif; overflow-x: hidden; }
         .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         .card { background: #111; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; transition: 0.3s; }
-        .card:hover { border-color: var(--main); transform: scale(1.02); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1); }
+        .card:hover { border-color: var(--main); transform: scale(1.02); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .btn-genre { white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; font-size: 10px; }
         .btn-genre.active { background: var(--main); color: black; border-color: var(--main); font-weight: bold; }
@@ -25,17 +25,16 @@
     <nav class="glass sticky top-0 px-6 py-4 flex flex-col gap-4 z-50">
         <div class="flex justify-between items-center">
             <h1 class="text-xl font-black italic">HM <span class="text-[#10b981]">STREAM</span></h1>
-            <div id="status" class="text-[8px] font-bold text-gray-400 uppercase px-3 py-1 bg-white/5 rounded-full tracking-tighter">System: Ready</div>
+            <div id="status" class="text-[8px] font-bold text-gray-400 uppercase px-3 py-1 bg-white/5 rounded-full">Secure</div>
         </div>
         <div class="relative">
-            <input type="text" id="query" placeholder="Cari judul anime..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:border-[#10b981] outline-none">
+            <input type="text" id="query" placeholder="Cari anime..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-[#10b981] outline-none">
         </div>
         <div id="genre-container" class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            <button onclick="setGenre('', this)" class="btn-genre active px-4 py-1.5 rounded-full uppercase">Terbaru</button>
+            <button onclick="setGenre('', this)" class="btn-genre active px-4 py-1.5 rounded-full uppercase">Recent</button>
             <button onclick="setGenre('action', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Action</button>
             <button onclick="setGenre('adventure', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Adventure</button>
             <button onclick="setGenre('comedy', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Comedy</button>
-            <button onclick="setGenre('fantasy', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Fantasy</button>
             <button onclick="setGenre('romance', this)" class="btn-genre px-4 py-1.5 rounded-full uppercase">Romance</button>
         </div>
     </nav>
@@ -43,142 +42,109 @@
     <main class="p-4 max-w-7xl mx-auto">
         <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
         <div id="pagination" class="flex justify-center mt-10 hidden">
-            <button onclick="more()" class="bg-white/5 border border-white/10 px-10 py-3 rounded-xl text-xs font-bold uppercase hover:bg-white/10 active:scale-95 transition-all tracking-widest">Load More</button>
+            <button onclick="more()" class="bg-white/5 border border-white/10 px-10 py-3 rounded-xl text-xs font-bold uppercase hover:bg-white/10 transition-all">Next Page</button>
         </div>
         <div id="loader" class="flex justify-center py-20"><div class="loader-icon"></div></div>
     </main>
 
-    <div id="modal" class="fixed inset-0 hidden z-[99] bg-black/98 flex items-center justify-center p-4">
+    <div id="modal" class="fixed inset-0 hidden z-[99] bg-black flex items-center justify-center p-4">
         <div class="w-full max-w-4xl relative">
-            <button onclick="closePlayer()" class="absolute -top-10 right-0 text-white/50 text-[10px] font-bold uppercase tracking-widest">Tutup <i class="fa-solid fa-xmark ml-1"></i></button>
+            <button onclick="closePlayer()" class="absolute -top-10 right-0 text-white/50 text-[10px] uppercase">Close</button>
             <div id="video-box" class="bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5"></div>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://api-amvstrm.c99.workers.dev/anime/gogoanime";
-        const PROXIES = [
-            "",
-            "https://api.allorigins.win/raw?url=",
-            "https://cors-anywhere.herokuapp.com/"
+        const ENDPOINTS = [
+            "https://consumet-api-production-e852.up.railway.app/anime/gogoanime",
+            "https://api.consumet.org/anime/gogoanime",
+            "https://api-amvstrm.c99.workers.dev/anime/gogoanime"
         ];
+        const PROXY = "https://api.allorigins.win/raw?url=";
         
         let page = 1;
         let genre = '';
         let searching = false;
 
-        async function getData(endpoint) {
-            const target = API_BASE + endpoint;
-            for (let px of PROXIES) {
+        async function fetchSmart(path) {
+            for (let base of ENDPOINTS) {
                 try {
-                    const r = await fetch(px + (px ? encodeURIComponent(target) : target), { 
-                        method: 'GET',
-                        headers: px ? {} : { 'Accept': 'application/json' }
-                    });
+                    const r = await fetch(base + path);
                     if (r.ok) return await r.json();
-                } catch (e) { continue; }
+                } catch {
+                    try {
+                        const pr = await fetch(PROXY + encodeURIComponent(base + path));
+                        if (pr.ok) return await pr.json();
+                    } catch { continue; }
+                }
             }
-            throw new Error();
+            throw 1;
         }
 
         async function sync(reset = false) {
-            if (reset) {
-                page = 1;
-                document.getElementById('grid').innerHTML = '';
-                document.getElementById('pagination').classList.add('hidden');
-            }
-            
+            if (reset) { page = 1; document.getElementById('grid').innerHTML = ''; }
             document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('status').innerText = "System: Syncing...";
-
+            document.getElementById('status').innerText = "Syncing...";
+            
             try {
-                let path = searching 
-                    ? `/${document.getElementById('query').value}?page=${page}`
-                    : (genre ? `/genre/${genre}?page=${page}` : `/recent-releases?page=${page}`);
-                
-                const res = await getData(path);
+                let p = searching ? `/${document.getElementById('query').value}?page=${page}` : 
+                        (genre ? `/genre/${genre}?page=${page}` : `/recent-releases?page=${page}`);
+                const res = await fetchSmart(p);
                 const data = res.results || [];
-                
-                if (data.length > 0) {
+                if (data.length) {
                     draw(data);
-                    document.getElementById('pagination').classList.toggle('hidden', data.length < 20);
-                    document.getElementById('status').innerText = "System: Online";
-                } else {
-                    if (reset) document.getElementById('grid').innerHTML = '<div class="col-span-full text-center py-20 opacity-20 uppercase text-[10px] tracking-[0.3em]">No Data Found</div>';
-                    document.getElementById('pagination').classList.add('hidden');
+                    document.getElementById('pagination').classList.remove('hidden');
+                    document.getElementById('status').innerText = "Ready";
                 }
-            } catch (e) {
-                document.getElementById('status').innerText = "System: Blocked";
-                document.getElementById('grid').innerHTML = '<div class="col-span-full text-center py-20 text-red-500/50 uppercase text-[9px] font-bold">Jaringan Terblokir Provider, Tuan 🗿</div>';
+            } catch {
+                document.getElementById('status').innerText = "Offline";
             } finally {
                 document.getElementById('loader').classList.add('hidden');
             }
         }
 
         function draw(items) {
-            const container = document.getElementById('grid');
+            const g = document.getElementById('grid');
             items.forEach(i => {
-                const el = document.createElement('div');
-                el.className = 'card cursor-pointer';
-                el.onclick = () => play(i.episodeId || i.id);
-                el.innerHTML = `
-                    <div class="relative overflow-hidden aspect-[3/4.2]">
-                        <img src="${i.image}" class="w-full h-full object-cover bg-zinc-900" loading="lazy">
-                        <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[8px] font-bold text-[#10b981]">
-                            ${i.episodeNumber ? 'EPS ' + i.episodeNumber : 'TV'}
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="text-[10px] font-bold line-clamp-2 leading-tight uppercase tracking-tighter">${i.title}</h3>
-                    </div>
+                const d = document.createElement('div');
+                d.className = 'card cursor-pointer';
+                d.onclick = () => play(i.episodeId || i.id);
+                d.innerHTML = `
+                    <img src="${i.image}" class="aspect-[3/4] object-cover w-full bg-zinc-900" onerror="this.src='https://placehold.co/300x400/111/10b981?text=No+Image'">
+                    <div class="p-2 text-[10px] font-bold truncate uppercase">${i.title}</div>
                 `;
-                container.appendChild(el);
+                g.appendChild(d);
             });
         }
 
-        function setGenre(g, btn) {
-            genre = g;
-            searching = false;
-            document.getElementById('query').value = '';
-            document.querySelectorAll('.btn-genre').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function setGenre(gn, b) {
+            genre = gn; searching = false;
+            document.querySelectorAll('.btn-genre').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
             sync(true);
         }
 
-        function more() {
-            page++;
-            sync();
-        }
+        function more() { page++; sync(); }
 
         async function play(id) {
             const m = document.getElementById('modal');
             const v = document.getElementById('video-box');
             m.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            v.innerHTML = `<div class="aspect-video flex items-center justify-center text-[10px] animate-pulse text-[#10b981] font-bold uppercase">Memanggil Jalur Stream...</div>`;
-            
+            v.innerHTML = `<div class="aspect-video flex items-center justify-center text-[10px] animate-pulse">CONNECTING...</div>`;
             try {
-                const res = await getData(`/watch/${id}`);
-                const link = res.headers?.Referer || res.sources[0].url;
-                v.innerHTML = `<iframe src="${link}" allowfullscreen></iframe>`;
-            } catch (e) {
-                v.innerHTML = `<div class="p-20 text-center text-[9px] uppercase font-bold text-red-500">Jalur Stream Buntu, Tuan.</div>`;
-            }
+                const d = await fetchSmart(`/watch/${id}`);
+                const s = d.headers?.Referer || d.sources[0].url;
+                v.innerHTML = `<iframe src="${s}" allowfullscreen></iframe>`;
+            } catch { v.innerHTML = `<div class="p-10 text-center">FAILED</div>`; }
         }
 
         function closePlayer() {
             document.getElementById('modal').classList.add('hidden');
             document.getElementById('video-box').innerHTML = '';
-            document.body.style.overflow = 'auto';
         }
 
         document.getElementById('query').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searching = true;
-                genre = '';
-                document.querySelectorAll('.btn-genre').forEach(b => b.classList.remove('active'));
-                sync(true);
-            }
+            if (e.key === 'Enter') { searching = true; genre = ''; sync(true); }
         });
 
         window.onload = () => sync();
