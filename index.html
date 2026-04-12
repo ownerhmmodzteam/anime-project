@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WatchNime • Premium Streaming</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="top-header" id="main-header">
+        <div class="brand-container">
+            <h1 class="logo-text">Watch<span>Nime</span></h1>
+            <div class="logo-sub">Official Developer</div>
+        </div>
+        <div class="header-actions">
+            <div class="user-avatar" onclick="goProfile()">
+                <img src="https://e.top4top.io/p_369675i750.png" alt="User">
+            </div>
+        </div>
+    </header>
+
+    <div id="search-overlay" class="search-overlay hidden">
+        <div class="search-content">
+            <div class="search-box-container">
+                <input type="text" id="searchInput" placeholder="Cari anime favoritmu...">
+                <button onclick="handleSearch()" class="search-confirm-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+            <button onclick="toggleSearch()" class="close-search-btn">Tutup</button>
+        </div>
+    </div>
+
+    <main id="app" class="app-content">
+        
+        <div id="loading" class="loading-overlay hidden">
+            <div class="loader-content">
+                <div class="orbit-spinner"></div>
+                <span>Memuat Data...</span>
+            </div>
+        </div>
+
+        <div id="home-view">
+            <section id="history-section" class="content-section hidden">
+                <div class="section-header">
+                    <div class="title-wrapper">
+                        <span class="dot-indicator pink"></span>
+                        <h3>Lanjutkan Nonton</h3>
+                    </div>
+                </div>
+                <div id="history-list" class="horizontal-scroll large-cards"></div>
+            </section>
+
+            <div id="home-content">
+                </div>
+        </div>
+
+        <div id="list-view" class="hidden">
+             <div class="section-header">
+                <div class="title-wrapper">
+                    <span class="dot-indicator blue"></span>
+                    <h3>Kategori & Hasil</h3>
+                </div>
+            </div>
+            <div class="genre-grid">
+                <button class="genre-pill" onclick="handleSearch('Action', true)">⚔️ Action</button>
+                <button class="genre-pill" onclick="handleSearch('Isekai', true)">🌀 Isekai</button>
+                <button class="genre-pill" onclick="handleSearch('Romance', true)">❤️ Romance</button>
+                <button class="genre-pill" onclick="handleSearch('Fantasy', true)">✨ Fantasy</button>
+            </div>
+            <div id="list-results" class="result-grid"></div>
+        </div>
+        
+        </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="goHome()" id="nav-home">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Beranda</span>
+        </div>
+        
+        <div class="nav-item-center">
+            <button class="center-fab" onclick="toggleSearch()" aria-label="Cari">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+        </div>
+
+        <div class="nav-item" onclick="goProfile()" id="nav-profile">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Profil</span>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
