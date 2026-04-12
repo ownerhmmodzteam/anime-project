@@ -1,81 +1,92 @@
-const API_BASE = 'https://anime.api.app.stenly.org';
+const PRIMARY_API = 'https://anime.api.app.stenly.org';
+const FALLBACK_API = 'https://cors-anywhere.herokuapp.com/https://anime.api.app.stenly.org';
 
-const HOME_SECTIONS = [
-    { title: "LayarOtaku Update", type: "latest", badge: "Ongoing", color: "pink" },
-    { title: "Trending Action", type: "query", queries: ["jujutsu", "solo leveling", "kaiju", "wind breaker"], badge: "Hot", color: "blue" }
-];
+let currentApi = PRIMARY_API;
+let currentAnimeEpisodes = [];
+let currentWatchContext = {};
 
 const getEl = (id) => document.getElementById(id);
-const showEl = (id) => getEl(id)?.classList.remove('hidden');
-const hideEl = (id) => getEl(id)?.classList.add('hidden');
-const loader = (active) => active ? showEl('loading') : hideEl('loading');
+const loader = (active) => active ? getEl('loading').classList.remove('hidden') : getEl('loading').classList.add('hidden');
 
-let currentAnimeEpisodes = []; 
-let currentWatchContext = {};  
-let watchTimer = null;         
-let trackedSeconds = 0;        
+async function smartFetch(endpoint) {
+    try {
+        const response = await fetch(`${currentApi}${endpoint}`);
+        if (!response.ok) throw new Error();
+        return await response.json();
+    } catch (err) {
+        if (currentApi === PRIMARY_API) {
+            currentApi = FALLBACK_API;
+            return await smartFetch(endpoint);
+        }
+        throw err;
+    }
+}
 
 function switchView(viewId) {
-    ['home-view', 'detail-view', 'watch-view', 'list-view', 'profile-view'].forEach(id => hideEl(id));
-    showEl(viewId);
-    
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    if (viewId === 'home-view') getEl('nav-home')?.classList.add('active');
-    if (viewId === 'profile-view') getEl('nav-profile')?.classList.add('active');
-    
-    if (viewId !== 'watch-view') stopWatchTimer();
+    ['home-view', 'detail-view', 'watch-view', 'list-view', 'profile-view'].forEach(id => getEl(id).classList.add('hidden'));
+    getEl(viewId).classList.remove('hidden');
 }
-
-function goHome() { switchView('home-view'); loadHomeData(); }
-function goProfile() { switchView('profile-view'); }
 
 function extractEpNumber(title) {
-    if (!title) return '?';
-    let match = title.match(/Episode\s+(\d+)/i);
-    if (match) return match[1];
-    match = title.match(/(\d+)$/);
-    if (match) return match[1];
-    return '?';
+    const match = title.match(/Episode\s+(\d+)/i) || title.match(/(\d+)$/);
+    return match ? match[1] : '?';
 }
 
-async function handleSearch(manualQuery = null) {
-    const query = manualQuery || getEl('searchInput').value;
+async function loadHomeData() {
+    loader(true);
+    try {
+        const data = await smartFetch('/latest');
+        const items = Array.isArray(data) ? data : (data.data || []);
+        getEl('home-content').innerHTML = `
+            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:15px; margin-top:20px">
+                ${items.map(anime => `
+                    <div onclick="loadDetail('${anime.url}')">
+                        <img src="${anime.image}" style="width:100%; border-radius:12px; aspect-ratio:3/4; object-fit:cover">
+                        <p style="font-size:0.8rem; margin-top:5px; font-weight:600">${anime.title}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (e) {
+        getEl('home-content').innerHTML = '<p style="text-align:center; padding:20px">Gagal memuat data. Coba lagi nanti.</p>';
+    } finally { loader(false); }
+}
+
+async function handleSearch() {
+    const query = getEl('searchInput').value;
     if (!query) return;
     loader(true);
+    getEl('search-overlay').classList.add('hidden');
     switchView('list-view');
     try {
-        const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        getEl('list-results').innerHTML = data.map(anime => `
-            <div class="anime-card" onclick="loadDetail('${anime.url}')">
-                <img src="${anime.image}" class="card-img">
-                <div class="card-title">${anime.title}</div>
+        const data = await smartFetch(`/search?q=${encodeURIComponent(query)}`);
+        const items = Array.isArray(data) ? data : (data.data || []);
+        getEl('list-results').innerHTML = items.map(anime => `
+            <div onclick="loadDetail('${anime.url}')" style="display:flex; gap:15px; margin-bottom:15px; background:var(--bg-card); padding:10px; border-radius:12px">
+                <img src="${anime.image}" style="width:80px; border-radius:8px">
+                <div><h4 style="font-size:0.9rem">${anime.title}</h4></div>
             </div>
         `).join('');
-    } catch (e) { console.error(e); } finally { loader(false); }
+    } finally { loader(false); }
 }
 
-async function loadDetail(url, mode = 'view') {
-    if (mode === 'view') { loader(true); switchView('detail-view'); }
+async function loadDetail(url) {
+    loader(true);
+    switchView('detail-view');
     try {
-        const res = await fetch(`${API_BASE}/detail?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
+        const data = await smartFetch(`/detail?url=${encodeURIComponent(url)}`);
         currentAnimeEpisodes = data.episodes;
-        currentWatchContext = { title: data.title, image: data.image, mainUrl: url };
-        if (mode === 'view') {
-            getEl('anime-info').innerHTML = `<h2>${data.title}</h2><p>${data.description}</p>`;
-            getEl('episode-grid').innerHTML = data.episodes.map(ep => {
-                const epNum = extractEpNumber(ep.title);
-                return `<div class="ep-btn" onclick="startWatchSession('${ep.url}', '${epNum}')">${epNum}</div>`
-            }).join('');
-        }
-        return true;
-    } catch (e) { return false; } finally { if (mode === 'view') loader(false); }
-}
-
-function startWatchSession(epUrl, epNum, startTime = 0) {
-    trackedSeconds = startTime;
-    loadVideo(epUrl, epNum);
+        currentWatchContext = { title: data.title, image: data.image };
+        getEl('anime-info').innerHTML = `
+            <img src="${data.image}" style="width:100%; border-radius:15px; margin-bottom:15px">
+            <h2>${data.title}</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin:10px 0">${data.description}</p>
+        `;
+        getEl('episode-grid').innerHTML = data.episodes.map(ep => {
+            const num = extractEpNumber(ep.title);
+            return `<button class="ep-num-btn" onclick="loadVideo('${ep.url}', '${num}')">${num}</button>`;
+        }).join('');
+    } finally { loader(false); }
 }
 
 async function loadVideo(epUrl, epNum) {
@@ -83,34 +94,28 @@ async function loadVideo(epUrl, epNum) {
     switchView('watch-view');
     getEl('video-title').innerText = `${currentWatchContext.title} - Ep ${epNum}`;
     
-    renderWatchPlaylist(epNum);
+    getEl('watch-episode-list').innerHTML = currentAnimeEpisodes.map(ep => {
+        const num = extractEpNumber(ep.title);
+        return `<div class="ep-num-btn ${num == epNum ? 'active' : ''}" onclick="loadVideo('${ep.url}', '${num}')">${num}</div>`;
+    }).join('');
+
+    getEl('mini-detail-content').innerHTML = `
+        <img src="${currentWatchContext.image}" class="mini-poster">
+        <div class="mini-info-text"><h4>${currentWatchContext.title}</h4><p>Sedang menonton Episode ${epNum}</p></div>
+    `;
+
     try {
-        const res = await fetch(`${API_BASE}/watch?url=${encodeURIComponent(epUrl)}`);
-        const data = await res.json();
-        const player = getEl('video-player');
-        if (data.streams.length > 0) {
-            player.src = data.streams[0].url;
-            getEl('server-options').innerHTML = data.streams.map(s => `<button class="server-btn" onclick="getEl('video-player').src='${s.url}'">${s.server}</button>`).join('');
+        const data = await smartFetch(`/watch?url=${encodeURIComponent(epUrl)}`);
+        if (data.streams && data.streams.length > 0) {
+            getEl('video-player').src = data.streams[0].url;
+            getEl('server-options').innerHTML = data.streams.map(s => `<button class="ep-num-btn" style="width:auto; padding:0 15px; height:35px" onclick="getEl('video-player').src='${s.url}'">${s.server}</button>`).join('');
         }
     } finally { loader(false); }
 }
 
-function renderWatchPlaylist(currentEpNum) {
-    const container = getEl('watch-episode-list');
-    container.innerHTML = currentAnimeEpisodes.map(ep => {
-        const num = extractEpNumber(ep.title);
-        const isActive = (num == currentEpNum) ? 'active' : ''; 
-        return `<div class="ep-num-btn ${isActive}" onclick="startWatchSession('${ep.url}', '${num}')">${num}</div>`;
-    }).join('');
-
-    const miniDetail = getEl('mini-detail-content');
-    if (currentWatchContext.title) {
-        miniDetail.innerHTML = `<img src="${currentWatchContext.image}" class="mini-poster"><div class="mini-info-text"><h4>${currentWatchContext.title}</h4><p>Episode ${currentEpNum}</p></div>`;
-    }
-}
-
-function stopWatchTimer() { if (watchTimer) clearInterval(watchTimer); }
+function goHome() { switchView('home-view'); loadHomeData(); }
+function goProfile() { switchView('profile-view'); }
 function backToDetail() { switchView('detail-view'); }
 function toggleSearch() { getEl('search-overlay').classList.toggle('hidden'); }
 
-document.addEventListener('DOMContentLoaded', () => goHome());
+document.addEventListener('DOMContentLoaded', goHome);

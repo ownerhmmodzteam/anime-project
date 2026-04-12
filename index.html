@@ -11,7 +11,7 @@
 
     <header class="top-header" id="main-header">
         <div class="brand-container">
-            <div class="logo-text">WatchNime</div>
+            <div class="logo-text">Watch<span>Nime</span></div>
             <div class="logo-sub">R_hmt ofc</div>
         </div>
         <div class="user-avatar" onclick="goProfile()">
@@ -19,29 +19,10 @@
         </div>
     </header>
 
-    <div id="resume-toast" class="mini-player-container hidden">
-        <div class="mini-player-content">
-            <div class="mp-info">
-                <span class="mp-label">Lanjutkan Menonton</span>
-                <span id="resume-text" class="mp-title">Loading...</span>
-            </div>
-            <div class="mp-controls">
-                <button onclick="confirmResume()" class="mp-btn-play" aria-label="Play">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M8 5v14l11-7z"/></svg>
-                </button>
-                <button onclick="closeResume()" class="mp-btn-close" aria-label="Close">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div id="search-overlay" class="search-overlay hidden">
         <div class="search-box-container">
-            <input type="text" id="searchInput" placeholder="Cari anime (cth: Naruto)...">
-            <button onclick="handleSearch()" class="search-confirm-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
+            <input type="text" id="searchInput" placeholder="Cari anime...">
+            <button onclick="handleSearch()" class="search-confirm-btn">🔍</button>
             <button onclick="toggleSearch()" class="close-search">✕</button>
         </div>
     </div>
@@ -53,54 +34,26 @@
         </div>
 
         <div id="home-view">
-            <div id="history-section" class="hidden">
-                <div class="section-title">
-                    <div class="bar-accent pink"></div>
-                    <h3>Lanjutkan Menonton</h3>
-                </div>
-                <div id="history-list" class="horizontal-scroll large-cards"></div>
-            </div>
             <div id="home-content"></div>
         </div>
 
         <div id="list-view" class="hidden">
-             <div class="section-title">
-                <div class="bar-accent blue"></div>
-                <h3>Jelajahi Genre</h3>
-            </div>
-            <div class="genre-grid">
-                <button onclick="handleSearch('Isekai', true)">🌀 Isekai</button>
-                <button onclick="handleSearch('Action', true)">⚔️ Action</button>
-                <button onclick="handleSearch('Romance', true)">❤️ Romance</button>
-                <button onclick="handleSearch('Fantasy', true)">✨ Fantasy</button>
-                <button onclick="handleSearch('Drama', true)">🎭 Drama</button>
-                <button onclick="handleSearch('Comedy', true)">😂 Comedy</button>
-                <button onclick="handleSearch('Slice of Life', true)">🍃 Slice of Life</button>
-                <button onclick="handleSearch('Horror', true)">👻 Horror</button>
-            </div>
             <div id="list-results"></div>
         </div>
 
         <div id="detail-view" class="hidden">
             <div class="nav-back">
-                <button onclick="goHome()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                </button>
+                <button onclick="goHome()">⬅</button>
                 <span>Detail Anime</span>
             </div>
             <div id="anime-info"></div>
-            <div class="section-divider">
-                <h3>Daftar Episode</h3>
-            </div>
             <div class="episode-grid" id="episode-grid"></div>
         </div>
 
         <div id="watch-view" class="hidden">
-             <div class="nav-back">
-                <button onclick="backToDetail()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                </button>
-                <span>Streaming</span>
+            <div class="nav-back">
+                <button onclick="backToDetail()">⬅</button>
+                <span id="video-title-top">Streaming</span>
             </div>
 
             <div class="video-container shadow-glow">
@@ -108,16 +61,14 @@
             </div>
 
             <div class="watch-info">
-                <h2 id="video-title">Loading...</h2>
+                <h2 id="video-title">Memuat...</h2>
                 <div class="server-area">
                     <div class="server-list" id="server-options"></div>
                 </div>
             </div>
 
             <div class="watch-playlist">
-                <div class="section-divider">
-                    <h3>EPISODE</h3>
-                </div>
+                <div class="section-divider"><h3>EPISODE</h3></div>
                 <div class="episode-numbers" id="watch-episode-list"></div>
             </div>
 
@@ -140,46 +91,19 @@
         </div>
 
         <div id="profile-view" class="hidden">
-            <div class="profile-banner" style="background-image: url('https://j.top4top.io/p_36895t2sb0.jpeg');"></div>
             <div class="profile-card-overlay">
                 <img src="https://e.top4top.io/p_369675i750.png" class="big-avatar">
                 <h2>R_hmt ofc</h2>
-                <p class="role-badge">Developer & Admin</p>
-                <div class="disclaimer-box">
-                    <strong>⚠️ Informasi Penting</strong>
-                    <p>Web ini dibuat semata-mata untuk tujuan pembelajaran.</p>
-                </div>
-                <div class="profile-menu">
-                    <div class="menu-item" onclick="window.open('https://whatsapp.com/channel/0029Vb6ukqnHQbS4mKP0j80L', '_blank')">
-                        <div class="menu-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                        </div>
-                        <span>Join Channel WhatsApp</span>
-                        <div class="menu-arrow">›</div>
-                    </div>
-                </div>
-                <button onclick="localStorage.clear(); location.reload()" class="btn-reset">
-                    Reset Cache & History
-                </button>
+                <button onclick="localStorage.clear(); location.reload()" class="btn-reset">Reset App</button>
             </div>
         </div>
 
     </main>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="goHome()" id="nav-home">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg>
-            <span>Home</span>
-        </div>
-        <div class="nav-item-center">
-            <button class="center-fab" onclick="toggleSearch()">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
-        </div>
-        <div class="nav-item" onclick="goProfile()" id="nav-profile">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>Profile</span>
-        </div>
+        <div class="nav-item active" onclick="goHome()" id="nav-home">🏠<span>Home</span></div>
+        <div class="nav-item-center"><button class="center-fab" onclick="toggleSearch()">🔍</button></div>
+        <div class="nav-item" onclick="goProfile()" id="nav-profile">👤<span>Profile</span></div>
     </nav>
 
     <script src="app.js"></script>
