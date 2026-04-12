@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = 'https://anime.api.app.stenly.org';
 
 // --- CONFIG ---
 const HOME_SECTIONS = [
