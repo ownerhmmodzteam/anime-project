@@ -2,110 +2,117 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WatchNime • R_hmt ofc</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HM STREAM - Anime Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #000b1e; /* Deep Blue */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .anime-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-    <header class="top-header" id="main-header">
-        <div class="brand-container">
-            <div class="logo-text">Watch<span>Nime</span></div>
-            <div class="logo-sub">hmmodz project</div>
+    <nav class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            HM STREAM
+        </h1>
+        <div class="flex gap-6 items-center">
+            <div class="relative">
+                <input type="text" id="searchAnime" placeholder="Cari anime..." class="bg-blue-900/30 border border-blue-500/30 rounded-full px-4 py-1 focus:outline-none focus:border-blue-400">
+            </div>
+            <i class="fa-solid fa-bell cursor-pointer hover:text-blue-400"></i>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600"></div>
         </div>
-        <div class="user-avatar" onclick="goProfile()">
-            <img src="https://e.top4top.io/p_369675i750.png" alt="User">
+    </nav>
+
+    <header class="p-6">
+        <div class="h-64 rounded-3xl overflow-hidden relative shadow-2xl">
+            <img src="https://images.alphacoders.com/132/1322308.png" class="w-full h-full object-cover opacity-60">
+            <div class="absolute bottom-0 left-0 p-8">
+                <span class="bg-blue-600 px-3 py-1 rounded-md text-xs font-bold mb-2 inline-block">TRENDING</span>
+                <h2 class="text-4xl font-bold">Explore Your Favorite Anime</h2>
+                <p class="text-gray-300 mt-2">Streaming tanpa batas dengan kualitas terbaik.</p>
+            </div>
         </div>
     </header>
 
-    <div id="search-overlay" class="search-overlay hidden">
-        <div class="search-box-container">
-            <input type="text" id="searchInput" placeholder="Cari anime...">
-            <button onclick="handleSearch()" class="search-confirm-btn">🔍</button>
-            <button onclick="toggleSearch()" class="close-search">✕</button>
-        </div>
-    </div>
-
-    <main id="app" class="app-content">
-        
-        <div id="loading" class="hidden">
-            <div class="orbit-spinner"></div>
+    <main class="p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold">Update Terbaru</h3>
+            <button class="text-blue-400 text-sm hover:underline">Lihat Semua</button>
         </div>
 
-        <div id="home-view">
-            <div id="home-content"></div>
+        <div id="animeContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
+            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
+            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
         </div>
-
-        <div id="list-view" class="hidden">
-            <div id="list-results"></div>
-        </div>
-
-        <div id="detail-view" class="hidden">
-            <div class="nav-back">
-                <button onclick="goHome()">⬅</button>
-                <span>Detail Anime</span>
-            </div>
-            <div id="anime-info"></div>
-            <div class="episode-grid" id="episode-grid"></div>
-        </div>
-
-        <div id="watch-view" class="hidden">
-            <div class="nav-back">
-                <button onclick="backToDetail()">⬅</button>
-                <span id="video-title-top">Streaming</span>
-            </div>
-
-            <div class="video-container shadow-glow">
-                <iframe id="video-player" src="" allowfullscreen></iframe>
-            </div>
-
-            <div class="watch-info">
-                <h2 id="video-title">Memuat...</h2>
-                <div class="server-area">
-                    <div class="server-list" id="server-options"></div>
-                </div>
-            </div>
-
-            <div class="watch-playlist">
-                <div class="section-divider"><h3>EPISODE</h3></div>
-                <div class="episode-numbers" id="watch-episode-list"></div>
-            </div>
-
-            <div class="watch-playlist" style="margin-top: 15px;">
-                <div class="section-divider"><h3>DETAIL ANIME</h3></div>
-                <div id="mini-detail-content" class="mini-detail-card"></div>
-            </div>
-
-            <div class="watch-playlist" style="margin-top: 15px;">
-                <div class="section-divider"><h3>KOMENTAR</h3></div>
-                <div class="comment-box-dummy">
-                    <div class="user-info-mini">
-                        <img src="https://e.top4top.io/p_369675i750.png" class="avatar-xs">
-                        <span>R_hmt ofc (Dev)</span>
-                    </div>
-                    <textarea placeholder="Tulis komentarmu..." readonly></textarea>
-                    <button class="btn-send-dummy">Kirim</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="profile-view" class="hidden">
-            <div class="profile-card-overlay">
-                <img src="https://e.top4top.io/p_369675i750.png" class="big-avatar">
-                <h2>R_hmt ofc</h2>
-                <button onclick="localStorage.clear(); location.reload()" class="btn-reset">Reset App</button>
-            </div>
-        </div>
-
     </main>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="goHome()" id="nav-home">🏠<span>Home</span></div>
-        <div class="nav-item-center"><button class="center-fab" onclick="toggleSearch()">🔍</button></div>
-        <div class="nav-item" onclick="goProfile()" id="nav-profile">👤<span>Profile</span></div>
-    </nav>
+    <footer class="p-10 text-center glass mt-10">
+        <div class="flex justify-center gap-6 mb-4">
+            <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fa-brands fa-telegram"></i></a>
+        </div>
+        <p class="text-gray-500 text-sm">© 2026 HM STREAM. Dibuat dengan antusiasme tinggi.</p>
+    </footer>
 
-    <script src="app.js"></script>
+    <script>
+        const API_KEY = "MASUKKAN_APIKEY_KAMU_DISINI";
+        const BASE_URL = "https://api.app.orbitcloud.web.id/v2";
+
+        // Fungsi Fetch Anime (Contoh Implementasi)
+        async function fetchAnime() {
+            try {
+                // Catatan: Endpoint di bawah ini adalah simulasi berdasarkan dokumentasi umum OrbitCloud V2
+                // Sesuaikan endpoint-nya dengan dokumentasi asli (misal: /anime/recent atau /otakudesu)
+                const response = await fetch(`${BASE_URL}/otakudesu/home?apikey=${API_KEY}`);
+                const data = await response.json();
+                
+                renderAnime(data.result);
+            } catch (error) {
+                console.error("Gagal memuat data:", error);
+                document.getElementById('animeContainer').innerHTML = "<p class='col-span-full text-center text-red-400'>Gagal memuat data. Periksa API Key atau Koneksi.</p>";
+            }
+        }
+
+        function renderAnime(list) {
+            const container = document.getElementById('animeContainer');
+            container.innerHTML = "";
+
+            list.slice(0, 12).forEach(item => {
+                container.innerHTML += `
+                    <div class="anime-card glass rounded-xl overflow-hidden cursor-pointer">
+                        <div class="relative h-48">
+                            <img src="${item.thumbnail}" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-[10px] font-bold">
+                                ${item.status || 'Ongoing'}
+                            </span>
+                        </div>
+                        <div class="p-3">
+                            <h4 class="text-sm font-medium truncate">${item.title}</h4>
+                            <p class="text-xs text-gray-400 mt-1">${item.episode || 'New Episode'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Jalankan saat load
+        window.onload = fetchAnime;
+    </script>
 </body>
 </html>
