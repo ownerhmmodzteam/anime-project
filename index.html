@@ -2,117 +2,310 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HM STREAM - Anime Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HM STREAM WEB VERSION</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --accent: #007AFF;
+            --bg: #000000;
+            --card: rgba(28, 28, 30, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background-color: #000b1e; /* Deep Blue */
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, rgba(0, 122, 255, 0.15) 0%, transparent 50%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 180px;
+            position: relative;
+            z-index: 1;
         }
-        .anime-card:hover {
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
         }
+
+        .hero-section {
+            position: relative; height: 420px;
+            border-radius: 0 0 50px 50px; overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .feature-card {
+            position: relative;
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            height: 160px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:active { transform: scale(0.92); }
+
+        .card-bg-img {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.4;
+            filter: saturate(1.2);
+        }
+
+        .card-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.8));
+            z-index: 1;
+        }
+
+        .nav-dock-container {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 99999;
+            pointer-events: none;
+        }
+
+        .nav-dock {
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 35px;
+            padding: 10px 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            width: 60px; height: 60px; border-radius: 24px;
+            color: #8E8E93; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .nav-btn.active { background: #fff; color: #000; transform: translateY(-3px); }
+
+        #dynamic-island {
+            position: fixed; top: 12px; left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            width: 180px; height: 36px;
+            background: #000; border-radius: 20px;
+            z-index: 100000; opacity: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            border: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        #dynamic-island.active {
+            opacity: 1; transform: translateX(-50%) scale(1);
+            width: 280px; height: 60px; border-radius: 30px;
+        }
+
+        .island-content {
+            display: none; width: 100%; padding: 0 20px;
+            align-items: center; gap: 12px;
+        }
+
+        #dynamic-island.active .island-content { display: flex; }
+
+        .spinner-ios {
+            width: 22px; height: 22px;
+            border: 2.5px solid rgba(255,255,255,0.1);
+            border-top: 2.5px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .scroll-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="scroll-hide">
 
-    <nav class="glass sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            HM STREAM
-        </h1>
-        <div class="flex gap-6 items-center">
-            <div class="relative">
-                <input type="text" id="searchAnime" placeholder="Cari anime..." class="bg-blue-900/30 border border-blue-500/30 rounded-full px-4 py-1 focus:outline-none focus:border-blue-400">
+    <div id="dynamic-island">
+        <div class="island-content">
+            <div class="spinner-ios"></div>
+            <div class="flex-1">
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest leading-none mb-1">Connecting</p>
+                <h5 id="target-name" class="text-xs font-black text-white uppercase tracking-tight"></h5>
             </div>
-            <i class="fa-solid fa-bell cursor-pointer hover:text-blue-400"></i>
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600"></div>
+            <i class="fa-solid fa-wifi text-blue-500 text-xs"></i>
         </div>
-    </nav>
+    </div>
 
-    <header class="p-6">
-        <div class="h-64 rounded-3xl overflow-hidden relative shadow-2xl">
-            <img src="https://images.alphacoders.com/132/1322308.png" class="w-full h-full object-cover opacity-60">
-            <div class="absolute bottom-0 left-0 p-8">
-                <span class="bg-blue-600 px-3 py-1 rounded-md text-xs font-bold mb-2 inline-block">TRENDING</span>
-                <h2 class="text-4xl font-bold">Explore Your Favorite Anime</h2>
-                <p class="text-gray-300 mt-2">Streaming tanpa batas dengan kualitas terbaik.</p>
+    <header id="mainHeader" class="fixed top-0 w-full z-[10000] p-6 transition-all">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <h1 class="text-xl font-black italic tracking-tighter uppercase">HM <span class="text-blue-500 not-italic">STREAM</span></h1>
+            <div class="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
+                <span id="clock" class="text-[11px] font-bold tracking-widest text-blue-400">00:00</span>
             </div>
         </div>
     </header>
 
-    <main class="p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold">Update Terbaru</h3>
-            <button class="text-blue-400 text-sm hover:underline">Lihat Semua</button>
+    <div id="home-tab" class="tab-content active">
+        <div class="hero-section">
+            <img src="anime.png" class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            <div class="absolute bottom-10 left-8 right-8 z-20">
+                <span class="bg-blue-600 text-[9px] font-black px-2.5 py-1 rounded-md mb-3 inline-block uppercase tracking-widest shadow-lg">Featured Content</span>
+                <h2 class="text-5xl font-black mb-5 tracking-tighter leading-[0.9]">ANIME<br>EXPLORER</h2>
+                <button onclick="connect('Anime', 'https://s12.nontonanimeid.boats/')" class="bg-white text-black h-12 px-10 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-90 transition-transform">Mulai Nonton</button>
+            </div>
         </div>
 
-        <div id="animeContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
-            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
-            <div class="animate-pulse bg-gray-700 h-64 rounded-xl"></div>
+        <div class="px-6">
+            <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-white/30 mb-5">Stream Fiture</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="feature-card" onclick="connect('Anime', 'https://animek-two.vercel.app')">
+                    <img src="anime.png" class="card-bg-img">
+                    <div class="card-overlay"></div>
+                    <div class="relative z-10 p-5 h-full flex flex-col justify-end">
+                        <h4 class="font-black text-sm uppercase tracking-tight">Anime</h4>
+                        <p class="text-[9px] text-white/50 uppercase font-bold tracking-widest">Update Harian</p>
+                    </div>
+                </div>
+                <div class="feature-card" onclick="connect('Movies', 'https://tv9.lk21official.cc/')">
+                    <img src="film.png" class="card-bg-img">
+                    <div class="card-overlay"></div>
+                    <div class="relative z-10 p-5 h-full flex flex-col justify-end">
+                        <h4 class="font-black text-sm uppercase tracking-tight">Movies</h4>
+                        <p class="text-[9px] text-white/50 uppercase font-bold tracking-widest">Movie Stream</p>
+                    </div>
+                </div>
+                <div class="feature-card" onclick="connect('Donghua', 'https://donghub.vip/')">
+                    <img src="donghua.png" class="card-bg-img">
+                    <div class="card-overlay"></div>
+                    <div class="relative z-10 p-5 h-full flex flex-col justify-end">
+                        <h4 class="font-black text-sm uppercase tracking-tight">Donghua</h4>
+                        <p class="text-[9px] text-white/50 uppercase font-bold tracking-widest">Donghua Stream</p>
+                    </div>
+                </div>
+                <div class="feature-card" onclick="connect('Music', 'https://bintangtools.diskon.cloud/tools/starsound/')">
+                    <img src="music.png" class="card-bg-img">
+                    <div class="card-overlay"></div>
+                    <div class="relative z-10 p-5 h-full flex flex-col justify-end">
+                        <h4 class="font-black text-sm uppercase tracking-tight">Music</h4>
+                        <p class="text-[9px] text-white/50 uppercase font-bold tracking-widest">Dengarkan Gratis</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="p-10 text-center glass mt-10">
-        <div class="flex justify-center gap-6 mb-4">
-            <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fa-brands fa-tiktok"></i></a>
-            <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fa-brands fa-telegram"></i></a>
+    <div id="profile-tab" class="tab-content pt-32 px-6">
+        <div class="max-w-md mx-auto">
+            <div class="bg-gradient-to-br from-[#1c1c1e] to-black rounded-[40px] p-10 text-center border border-white/5 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-blue-500/50"></div>
+                <img src="https://files.catbox.moe/4y3suf.png" class="w-28 h-28 rounded-[35px] mx-auto mb-6 object-cover border-4 border-white/5 shadow-2xl">
+                <h3 class="text-2xl font-black tracking-tight uppercase">RAIHAN MUSALAH</h3>
+                <p class="text-blue-500 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Solo Developer</p>
+            </div>
+            <div class="mt-8 space-y-4">
+                <a href="https://t.me/hmmodzch" class="flex items-center p-5 bg-[#1c1c1e]/50 rounded-[28px] border border-white/5 active:scale-95 transition-transform">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fa-brands fa-telegram text-blue-400 text-xl"></i>
+                    </div>
+                    <span class="flex-1 text-[13px] font-bold uppercase tracking-wider">Telegram Channel</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-white/20"></i>
+                </a>
+                <a href="https://tiktok.com/@hmmodzvip" class="flex items-center p-5 bg-[#1c1c1e]/50 rounded-[28px] border border-white/5 active:scale-95 transition-transform">
+                    <div class="w-12 h-12 bg-pink-500/10 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fa-brands fa-tiktok text-pink-400 text-xl"></i>
+                    </div>
+                    <span class="flex-1 text-[13px] font-bold uppercase tracking-wider">Tiktok Official</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-white/20"></i>
+                </a>
+            </div>
         </div>
-        <p class="text-gray-500 text-sm">© 2026 HM STREAM. Dibuat dengan antusiasme tinggi.</p>
-    </footer>
+    </div>
+
+    <div class="nav-dock-container">
+        <div class="nav-dock">
+            <button id="homeBtn" onclick="switchTab('home', 'homeBtn')" class="nav-btn active">
+                <i class="fa-solid fa-house-simple text-xl"></i>
+            </button>
+            <button id="profileBtn" onclick="switchTab('profile', 'profileBtn')" class="nav-btn">
+                <i class="fa-solid fa-user-ninja text-xl"></i>
+            </button>
+        </div>
+    </div>
 
     <script>
-        const API_KEY = "MASUKKAN_APIKEY_KAMU_DISINI";
-        const BASE_URL = "https://api.app.orbitcloud.web.id/v2";
-
-        // Fungsi Fetch Anime (Contoh Implementasi)
-        async function fetchAnime() {
-            try {
-                // Catatan: Endpoint di bawah ini adalah simulasi berdasarkan dokumentasi umum OrbitCloud V2
-                // Sesuaikan endpoint-nya dengan dokumentasi asli (misal: /anime/recent atau /otakudesu)
-                const response = await fetch(`${BASE_URL}/otakudesu/home?apikey=${API_KEY}`);
-                const data = await response.json();
-                
-                renderAnime(data.result);
-            } catch (error) {
-                console.error("Gagal memuat data:", error);
-                document.getElementById('animeContainer').innerHTML = "<p class='col-span-full text-center text-red-400'>Gagal memuat data. Periksa API Key atau Koneksi.</p>";
-            }
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-        function renderAnime(list) {
-            const container = document.getElementById('animeContainer');
-            container.innerHTML = "";
-
-            list.slice(0, 12).forEach(item => {
-                container.innerHTML += `
-                    <div class="anime-card glass rounded-xl overflow-hidden cursor-pointer">
-                        <div class="relative h-48">
-                            <img src="${item.thumbnail}" class="w-full h-full object-cover">
-                            <span class="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-[10px] font-bold">
-                                ${item.status || 'Ongoing'}
-                            </span>
-                        </div>
-                        <div class="p-3">
-                            <h4 class="text-sm font-medium truncate">${item.title}</h4>
-                            <p class="text-xs text-gray-400 mt-1">${item.episode || 'New Episode'}</p>
-                        </div>
-                    </div>
-                `;
+        function switchTab(t, b) {
+            document.querySelectorAll('.tab-content').forEach(x => {
+                x.classList.remove('active');
             });
+            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+            
+            document.getElementById(t + '-tab').classList.add('active');
+            document.getElementById(b).classList.add('active');
+            
+            if ('vibrate' in navigator) navigator.vibrate(10);
         }
 
-        // Jalankan saat load
-        window.onload = fetchAnime;
+        function connect(name, url) {
+            const island = document.getElementById('dynamic-island');
+            document.getElementById('target-name').innerText = name;
+            island.classList.add('active');
+            if ('vibrate' in navigator) navigator.vibrate([15, 30]);
+            setTimeout(() => { 
+                island.classList.remove('active');
+                setTimeout(() => { window.location.href = url; }, 300);
+            }, 2000);
+        }
+
+        const scrollContainers = document.querySelectorAll('.tab-content');
+        scrollContainers.forEach(container => {
+            container.addEventListener('scroll', () => {
+                const header = document.getElementById('mainHeader');
+                if (container.scrollTop > 20) {
+                    header.style.background = 'rgba(0,0,0,0.8)';
+                    header.style.backdropFilter = 'blur(20px)';
+                } else {
+                    header.style.background = 'transparent';
+                    header.style.backdropFilter = 'none';
+                }
+            });
+        });
+
+        const h = new Hammer(document.body);
+        h.on('swiperight', () => switchTab('home', 'homeBtn'));
+        h.on('swipeleft', () => switchTab('profile', 'profileBtn'));
     </script>
 </body>
 </html>
