@@ -1,0 +1,11 @@
+{
+  "autoCloseDelay": 3000,
+  "dialogTitle": "Update Tersedia",
+  "downloadUrl": "https://t.me/hmmodzch",
+  "isMaintenance": false,
+  "message": "Versi HM STREAM kamu usang! Silakan perbarui aplikasi.",
+  "negativeButton": "Keluar",
+  "positiveButton": "Download",
+  "targetUrl": "https://hmstream.com",
+  "versionCode": 93
+}
