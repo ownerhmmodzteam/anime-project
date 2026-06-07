@@ -6,6 +6,6 @@
   "message": "Versi HM STREAM kamu usang! Silakan perbarui aplikasi.",
   "negativeButton": "Keluar",
   "positiveButton": "Download",
-  "targetUrl": "https://ownerhmmodzteam.github.io/maintance-server/",
+  "targetUrl": "https://hmmodz-server.vercel.app/",
   "versionCode": 9
 }
