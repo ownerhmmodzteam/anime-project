@@ -3,9 +3,9 @@
   "dialogTitle": "Update Tersedia",
   "downloadUrl": "https://t.me/hmmodzch",
   "isMaintenance": false,
-  "message": "Aplikasi Sedang Update, Mohon Tunggu.",
+  "message": "Aplikasi Telah Selesai Update, Silahkan Dowload Versi Terbaru..",
   "negativeButton": "Keluar",
   "positiveButton": "Download",
-  "targetUrl": "https://ownerhmmodzteam.github.io/maintance-server/",
+  "targetUrl": "https://apps-hmmodz-stream.vercel.app/",
   "versionCode": 10
 }
