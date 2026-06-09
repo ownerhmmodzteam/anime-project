@@ -3,9 +3,9 @@
   "dialogTitle": "Update Tersedia",
   "downloadUrl": "https://t.me/hmmodzch",
   "isMaintenance": false,
-  "message": "Versi HM STREAM kamu usang! Silakan perbarui aplikasi.",
+  "message": "Aplikasi Sedang Update, Mohon Tunggu.",
   "negativeButton": "Keluar",
   "positiveButton": "Download",
   "targetUrl": "https://ownerhmmodzteam.github.io/maintance-server/",
-  "versionCode": 9
+  "versionCode": 10
 }
