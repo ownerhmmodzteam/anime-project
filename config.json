@@ -2,7 +2,7 @@
   "autoCloseDelay": 3000,
   "dialogTitle": "Update Tersedia",
   "downloadUrl": "https://t.me/hmmodzch",
-  "isMaintenance": false,
+  "isMaintenance": true,
   "message": "Aplikasi Telah Selesai Update, Silahkan Dowload Versi Terbaru..",
   "negativeButton": "Keluar",
   "positiveButton": "Download",
