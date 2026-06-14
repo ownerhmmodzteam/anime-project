@@ -2,7 +2,7 @@
   "autoCloseDelay": 3000,
   "dialogTitle": "Pemberitahuan!!!",
   "downloadUrl": "https://about-hmmodzteam.netlify.app/",
-  "isMaintenance": true,
+  "isMaintenance": false,
   "message": "Aplikasi Sedang Dalam Pemeliharaan Server..",
   "negativeButton": "Keluar",
   "positiveButton": "Oke",
