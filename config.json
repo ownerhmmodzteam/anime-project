@@ -1,11 +1,11 @@
 {
   "autoCloseDelay": 3000,
   "dialogTitle": "Pemberitahuan!!!",
-  "downloadUrl": "https://t.me/hmmodzch",
-  "isMaintenance": false,
+  "downloadUrl": "https://about-hmmodzteam.netlify.app/",
+  "isMaintenance": true,
   "message": "Aplikasi Sedang Dalam Pemeliharaan Server..",
   "negativeButton": "Keluar",
   "positiveButton": "Oke",
-  "targetUrl": "https://apps-hmmodz-stream.vercel.app/",
+  "targetUrl": "https://ownerhmmodzteam.github.io/maintance-server/",
   "versionCode": 10
 }
