@@ -7,5 +7,5 @@
   "negativeButton": "Keluar",
   "positiveButton": "Oke",
   "targetUrl": "https://web3apps-server.vercel.app/",
-  "versionCode": 11.5
+  "versionCode": 12
 }
